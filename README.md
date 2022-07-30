@@ -28,7 +28,6 @@
 | gdbserver | [x86_64-linux-gnu](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/12.1/gdbserver-x86_64-linux-gnu.zip) |
 | gdbserver | [arm-linux-gnueabi](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/12.1/gdbserver-arm-linux-gnueabi.zip) |
 | gdbserver | [aarch64-linux-gnu](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/12.1/gdbserver-aarch64-linux-gnu.zip) |
-|           |                      |
 
 # Usage
 
