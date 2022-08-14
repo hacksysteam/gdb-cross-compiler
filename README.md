@@ -5,10 +5,7 @@
     <p align="center">Compile GDB for different architectures!</p>
 </p>
 <p align="center">
-    <a href="https://github.com/anuraghazra/github-readme-stats/pulls">
-        <img alt="GitHub pull requests"
-            src="https://img.shields.io/github/downloads/hacksysteam/gdb-cross-compiler/total.svg" />
-    </a>
+    <img alt="Download count" src="https://img.shields.io/github/downloads/hacksysteam/gdb-cross-compiler/total.svg" />
     <br />
     <br />
 </p>
