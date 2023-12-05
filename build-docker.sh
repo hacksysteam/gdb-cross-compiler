@@ -2,14 +2,14 @@
 
 set -e
 
-DOCKERFILE_PATH=$(realpath Dockerfile)
-DOCKER_IMAGE_NAME="gdb-compiler-image"
-DOCKER_CONTAINER_NAME="gdb-compiler-builder"
+DOCKERFILE_PATH=$(realpath ./Dockerfile)
+NAME_PREFIX="gdb-compiler"
+BOOKWORM_TAG="${NAME_PREFIX}-bookworm"
+BULLSEYE_TAG="${NAME_PREFIX}-bullseye"
+JAMMY_TAG="${NAME_PREFIX}-jammy"
 
-echo "[+] Building docker image: ${DOCKER_IMAGE_NAME}"
-docker build --tag ${DOCKER_IMAGE_NAME} -f "${DOCKERFILE_PATH}" .
+echo "[+] Building docker image: ${JAMMY_TAG}"
+docker build --tag ${JAMMY_TAG} --build-arg CODE_NAME=ubuntu:jammy - < "${DOCKERFILE_PATH}"
 
-echo
-echo "[+] Running gdb container: ${DOCKER_CONTAINER_NAME}"
-docker run -it --rm -v "$PWD:/gdb" --name ${DOCKER_CONTAINER_NAME} ${DOCKER_IMAGE_NAME}
-echo
+echo "[+] Running gdb container: ${JAMMY_TAG}-builder"
+docker run -it --rm -v "${PWD}:/gdb" --name "${JAMMY_TAG}-builder" ${JAMMY_TAG} /bin/bash -c "/bin/bash /gdb/build.sh"

@@ -2,11 +2,19 @@
 
 set -e
 
-PROJECT_DIR=$(dirname "$(realpath -s "$0")")
+GDB_FTP_URL="https://ftp.gnu.org/gnu/gdb/"
 
-GCC_VERSION=12
-GDB_VERSION=12.1
-PYTHON_VERSION=3.10
+if [ -z "${GDB_VERSION}" ]; then
+    echo "[!] GDB_VERSION not provided. Fetching from website..."
+    GDB_VERSION=$(curl -s ${GDB_FTP_URL} | grep -o 'gdb-[0-9.]*\.tar\.gz' | sort -V | tail -1 | sed 's/gdb-\([0-9.]*\)\.tar\.gz/\1/' | tr -d '\n')
+
+    if [ -z "${GDB_VERSION}" ]; then
+        echo "[-] Error: GDB version not found."
+        exit 1
+    fi
+fi
+
+PROJECT_DIR=$(dirname "$(realpath -s "$0")")
 GDB_ARCHS=("x86_64-linux-gnu")
 GDBSERVER_ARCHS=("i686-linux-gnu" "x86_64-linux-gnu" "arm-linux-gnueabi" "aarch64-linux-gnu")
 BUILD_PATH="${PROJECT_DIR}/build"
@@ -18,7 +26,7 @@ function buildGDB() {
     local buildPath
     local prefix
 
-    echo ""
+    echo "[+] GDB version: ${GDB_VERSION}"
 
     if [ "${isGDBServer}" = true ]; then
         echo "[+] Building GDB server for abi: ${eabi}"
@@ -37,6 +45,7 @@ function buildGDB() {
         if [ "${isGDBServer}" = true ]; then
             ${SOURCE_DIR}/configure \
                 --host="${eabi}" \
+                --enable-gdbserver \
                 --disable-gdb \
                 --disable-docs \
                 --disable-binutils \
@@ -44,16 +53,14 @@ function buildGDB() {
                 --disable-sim \
                 --disable-gprof \
                 --disable-inprocess-agent \
-                --enable-gdbserver \
                 --prefix="${buildPath}/binaries" \
-                CC="${eabi}-gcc-${GCC_VERSION}" \
-                CXX="${eabi}-g++-${GCC_VERSION}" \
+                CC="${eabi}-gcc" \
+                CXX="${eabi}-g++" \
                 LDFLAGS="-static -static-libstdc++"
         else
             ${SOURCE_DIR}/configure \
                 --host="${eabi}" \
                 --enable-targets=all \
-                --with-python=/usr/bin/python${PYTHON_VERSION} \
                 --disable-docs \
                 --disable-gdbserver \
                 --disable-binutils \
@@ -61,46 +68,52 @@ function buildGDB() {
                 --disable-sim \
                 --disable-gprof \
                 --disable-inprocess-agent \
+                --with-python=/usr/bin/python3 \
                 --prefix="${buildPath}/binaries" \
-                CC="${eabi}-gcc-${GCC_VERSION}" \
-                CXX="${eabi}-g++-${GCC_VERSION}"
+                CC="${eabi}-gcc" \
+                CXX="${eabi}-g++"
         fi
     else
         cd "${buildPath}" || exit
     fi
 
-    echo -e "\t[*] Path: ${buildPath}"
+    echo "[+] Path: ${buildPath}"
 
-    make
+    make -j`nproc`
     make install
 
     find ./* -maxdepth 0 -name "binaries" -prune -o -exec rm -rf {} \;
     mv binaries/* .
     rm -rf binaries
 
-    echo ""
+    if [ "${isGDBServer}" = true ]; then
+        OUTPUT_ARCHIVE_PATH="${buildPath}/gdbserver-${eabi}.zip"
+        echo "[+] Creating gdbserver archive: ${OUTPUT_ARCHIVE_PATH}"
+        cd bin/
+        zip -q ${OUTPUT_ARCHIVE_PATH} ./gdbserver
+    else
+        OUTPUT_ARCHIVE_PATH="${buildPath}/gdb-${eabi}.zip"
+        echo "[+] Creating gdb archive: ${OUTPUT_ARCHIVE_PATH}"
+        zip -q -r ${OUTPUT_ARCHIVE_PATH} ./*
+    fi
 
     cd "${PROJECT_DIR}" || exit
 }
 
 function downloadGDB() {
-    local url="https://ftp.gnu.org/gnu/gdb/gdb-${GDB_VERSION}.tar.gz"
+    local url="${GDB_FTP_URL}gdb-${GDB_VERSION}.tar.gz"
     local sourceDir="$1"
 
     if [[ ! -d "${sourceDir}" ]]; then
         mkdir -p "${sourceDir}"
         echo "[+] Downloading: ${url} in ${sourceDir}"
-        wget -qO- "${url}" | tar -xz --strip-components=1 -C "${sourceDir}"
+        curl -sL "${url}" | tar -xz --strip-components=1 -C "${sourceDir}"
     fi
 }
 
 mkdir -p "${BUILD_PATH}"
 
 downloadGDB "${SOURCE_DIR}"
-
-#
-# Build gdb and gdbserver
-#
 
 for ABI in "${GDB_ARCHS[@]}"; do
     buildGDB false "${ABI}"

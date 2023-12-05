@@ -1,16 +1,17 @@
-FROM ubuntu:22.04
+ARG CODE_NAME
+FROM ${CODE_NAME}
 
-ARG DEBIAN_FRONTEND=noninteractive
-ARG GCC_VERSION=12
+ENV DEBIAN_FRONTEND=noninteractive
 
 #
 # Install utils
 #
 
-RUN apt-get update -qq && \
-    apt-get clean && \
-    apt-get -qq -y upgrade && \
-    apt-get -y install git \
+RUN apt-get update -q && \
+    apt-get -q -y upgrade && \
+    apt-get -y install --no-install-recommends \
+        sudo \
+        git \
         gpg \
         curl \
         cmake \
@@ -22,74 +23,63 @@ RUN apt-get update -qq && \
         xxd \
         xz-utils \
         software-properties-common && \
+    apt-get autoremove -y && \
+    apt-get clean -y && \
     rm -rf /var/lib/apt/lists/* && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 2
+    rm -rf /tmp/*
 
 #
 # Install cross compilers
 #
 
-RUN apt-get update -qq && \
-    apt-get clean && \
-    apt-get -y install build-essential \
+RUN apt-get update -q && \
+    apt-get -q -y upgrade && \
+    apt-get -y install --no-install-recommends \
         binutils \
-        binutils-i686-gnu \
-        binutils-i686-linux-gnu \
-        binutils-x86-64-linux-gnu \
-        binutils-aarch64-linux-gnu \
-        binutils-arm-linux-gnueabi \
-        binutils-arm-linux-gnueabihf \
-        cpp-${GCC_VERSION} \
-        cpp-${GCC_VERSION}-aarch64-linux-gnu \
-        cpp-${GCC_VERSION}-arm-linux-gnueabi \
-        cpp-${GCC_VERSION}-arm-linux-gnueabihf \
-        cpp-${GCC_VERSION}-i686-linux-gnu \
-        gcc-${GCC_VERSION} \
-        gcc-${GCC_VERSION}-aarch64-linux-gnu \
-        gcc-${GCC_VERSION}-arm-linux-gnueabi \
-        gcc-${GCC_VERSION}-arm-linux-gnueabihf \
-        gcc-${GCC_VERSION}-i686-linux-gnu \
-        gcc-${GCC_VERSION}-multilib \
-        gcc-${GCC_VERSION}-multilib-i686-linux-gnu \
-        g++-${GCC_VERSION} \
-        g++-${GCC_VERSION}-aarch64-linux-gnu \
-        g++-${GCC_VERSION}-arm-linux-gnueabi \
-        g++-${GCC_VERSION}-arm-linux-gnueabihf \
-        g++-${GCC_VERSION}-i686-linux-gnu \
-        g++-${GCC_VERSION}-multilib \
-        g++-${GCC_VERSION}-multilib-i686-linux-gnu && \
-    rm -rf /var/lib/apt/lists/*
+        binutils-multiarch \
+        binutils-multiarch-dev \
+        build-essential \
+        crossbuild-essential-i386 \
+        crossbuild-essential-armel \
+        crossbuild-essential-armhf \
+        crossbuild-essential-arm64 && \
+    apt-get autoremove -y && \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/*
 
 #
 # Install gdb dependencies
 #
 
-RUN apt-get update -qq && \
-    apt-get clean && \
-    apt-get -y install texinfo \
-        libncurses5-dev \
+RUN apt-get update -q && \
+    apt-get -q -y upgrade && \
+    apt-get -y install --no-install-recommends \
+        texinfo \
+        libncurses-dev \
         libmpfr-dev \
+        libmpfrc++-dev \
         libgmp-dev \
         libexpat1-dev \
         libunwind-dev \
-        libpython3.10-dev \
-        python3.10-distutils && \
-    rm -rf /var/lib/apt/lists/*
+        libc6-dev \
+        python3 \
+        python3-dev \
+        python3-distutils \
+        python-is-python3 && \
+    apt-get autoremove -y && \
+    apt-get clean -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    rm -rf /tmp/*
 
 RUN mkdir -p /gdb/
 
-ADD ./build.sh /gdb/build.sh
+ARG USER="gdb"
 
-#
-# Add docker user
-#
+RUN adduser --disabled-password --gecos "" ${USER} && \
+    adduser ${USER} sudo && \
+    echo "%sudo ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-RUN adduser --disabled-password --gecos "" gdb && \
-    adduser gdb sudo && \
-    echo "%sudo ALL=(ALL) NOPASSWD:ALL" >>/etc/sudoers
-
-USER gdb
+USER ${USER}
 
 WORKDIR /gdb/
-
-ENTRYPOINT ["bash", "build.sh"]
