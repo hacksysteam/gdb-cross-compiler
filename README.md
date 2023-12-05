@@ -6,13 +6,14 @@
 </p>
 <p align="center">
     <img alt="Download count" src="https://img.shields.io/github/downloads/hacksysteam/gdb-cross-compiler/total.svg" />
-    <img alt="GDB Version" src="https://img.shields.io/badge/GDB-13.2-blue.svg" />
+    <img alt="GDB Version" src="https://img.shields.io/badge/GDB-14.1-blue.svg" />
     <br />
     <br />
 </p>
 
 ## Supported GDB Versions
 
+* **14.1**
 * **13.2**
 * **12.1**
 
@@ -23,6 +24,16 @@
 ## Downloads
 
 Automatically compiled binaries are available in the [Releases](https://github.com/hacksysteam/gdb-cross-compiler/releases) section.
+
+### GDB - 14.1
+
+| Name      | Architecture         |
+|-----------|----------------------|
+| gdb       | [x86_64-linux-gnu](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/14.1/gdb-x86_64-linux-gnu.zip) |
+| gdbserver | [i686-linux-gnu](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/14.1/gdbserver-i686-linux-gnu.zip) |
+| gdbserver | [x86_64-linux-gnu](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/14.1/gdbserver-x86_64-linux-gnu.zip) |
+| gdbserver | [arm-linux-gnueabi](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/14.1/gdbserver-arm-linux-gnueabi.zip) |
+| gdbserver | [aarch64-linux-gnu](https://github.com/hacksysteam/gdb-cross-compiler/releases/download/14.1/gdbserver-aarch64-linux-gnu.zip) |
 
 ### GDB - 13.2
 
