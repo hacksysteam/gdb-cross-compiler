@@ -5,7 +5,7 @@ set -e
 GDB_FTP_URL="https://ftp.gnu.org/gnu/gdb/"
 
 if [ -z "${GDB_VERSION}" ]; then
-    echo "[!] GDB_VERSION not provided. Fetching from website..."
+    echo "[!] GDB_VERSION not provided. Fetching version from ${GDB_FTP_URL}"
     GDB_VERSION=$(curl -s ${GDB_FTP_URL} | grep -o 'gdb-[0-9.]*\.tar\.gz' | sort -V | tail -1 | sed 's/gdb-\([0-9.]*\)\.tar\.gz/\1/' | tr -d '\n')
 
     if [ -z "${GDB_VERSION}" ]; then
@@ -13,6 +13,8 @@ if [ -z "${GDB_VERSION}" ]; then
         exit 1
     fi
 fi
+
+echo "[+] GDB version: ${GDB_VERSION}"
 
 PROJECT_DIR=$(dirname "$(realpath -s "$0")")
 GDB_ARCHS=("x86_64-linux-gnu")
@@ -25,8 +27,6 @@ function buildGDB() {
     local eabi="$2"
     local buildPath
     local prefix
-
-    echo "[+] GDB version: ${GDB_VERSION}"
 
     if [ "${isGDBServer}" = true ]; then
         echo "[+] Building GDB server for abi: ${eabi}"
