@@ -2,7 +2,7 @@
     <img width="100px" src="https://www.freewear.org/images/articles/detail/FW0345_Dise%C3%B1o.png"
         align="center" alt="GDB logo" />
     <h2 align="center">GDB Cross Compiler</h2>
-    <p align="center">Compile GDB for various distributions and architectures!</p>
+    <p align="center">Compiled GDB for various distributions and architectures!</p>
 </p>
 <p align="center">
     <img alt="Download count" src="https://img.shields.io/github/downloads/hacksysteam/gdb-cross-compiler/total.svg" />
